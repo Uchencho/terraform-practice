@@ -4,3 +4,12 @@ start-local-stack:
 .PHONY: show-plan
 show-plan:
 	terraform show plan.tfplan
+
+plan:
+	terraform plan -out=plan.tfplan
+
+plan-dev:
+	terraform plan -var-file=dev.tfvars -out=plan.tfplan
+
+apply-plan:
+	terraform apply plan.tfplan
