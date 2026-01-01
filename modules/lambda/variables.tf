@@ -35,4 +35,9 @@ variable "runtime_configs" {
     }
 }
 
+variable "lambda_exec_role_arn" {
+    type = string
+    description = "The ARN of the IAM role for the Lambda function"
+}
+
 data "aws_caller_identity" "current" {}

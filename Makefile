@@ -13,3 +13,9 @@ plan-dev:
 
 apply-plan:
 	terraform apply plan.tfplan
+
+init:
+	terraform init # Used when a new module is added
+
+clean:
+	terraform destroy -var-file=dev.tfvars
