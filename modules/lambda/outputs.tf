@@ -3,11 +3,6 @@ output "lambda_arn" {
     description = "The ARN of the Go Lambda function"
 }
 
-output "iam_role_arn" {
-    value = aws_iam_role.lambda_exec_role.arn
-    description = "The ARN of the IAM role for the Lambda function"
-}
-
 output "my_account_id" {
     value = data.aws_caller_identity.current.account_id
 }

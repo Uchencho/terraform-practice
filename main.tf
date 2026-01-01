@@ -1,55 +1,26 @@
-# 1. The IAM Role for the Lambda
-resource "aws_iam_role" "lambda_exec_role" {
-    name = "demo_lambda_role"
 
-    assume_role_policy = jsonencode(
-        {
-            Version = "2012-10-17"
-            Statement = [
-                {
-                    Action = "sts:AssumeRole"
-                    Effect = "Allow"
-                    Principal = {
-                        Service = "lambda.amazonaws.com"
-                    }
-                }
-            ]
-        }
-    )
+module "lambda_exec_role" {
+    source = "./modules/security"
+    env = var.env
+    providers = {
+        aws = aws
+    }
 }
 
-# 2. The Lambda Function
-resource "aws_lambda_function" "hello_world" {
-    function_name = "${var.app_name}-${var.env}-lambda"
-    role = aws_iam_role.lambda_exec_role.arn # <--- Reference
-    handler = var.runtime_configs.node.handler
-    runtime = var.runtimes.NodeRunTime
-    memory_size = local.lambda_memory
-
-    # Dummy file name for now
-    filename = "${path.module}/output.zip"
-
-    tags = merge(var.tags, {
-        Environment = var.env
-    })
+module "go_lambda" {
+  source = "./modules/lambda"
+  env = var.env
+  lambda_exec_role_arn = module.lambda_exec_role.iam_role_arn
+  providers = {
+    aws = aws.west
+  }
 }
 
-# Automatic binary zipping
-data "archive_file" "lambda_zip" {
-    type = "zip"
-    source_file = "${path.module}/bootstrap"
-    output_path = "${path.module}/output.zip"
-}
-
-# Reference the zip file in the Lambda resource
-resource "aws_lambda_function" "go_lambda" {
-  function_name = "MyGolangFunction"
-  filename = data.archive_file.lambda_zip.output_path
-  handler = var.runtime_configs.go.handler
-  runtime = var.runtimes.GoRunTime
-  source_code_hash = data.archive_file.lambda_zip.output_base64sha256 # <-- ensures if the code changes, terraform will re-upload
-  role = aws_iam_role.lambda_exec_role.arn
-  timeout = local.lambda_timeout
-
-  tags = local.common_tags
+module "node_lambda_east" {
+    source = "./modules/lambda"
+    env = var.env
+    lambda_exec_role_arn = module.lambda_exec_role.iam_role_arn
+    providers = {
+        aws = aws
+    }
 }

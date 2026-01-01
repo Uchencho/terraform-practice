@@ -1,6 +1,4 @@
 locals {
-    
-
     # If env is "prod", give it 1024MB; otherwise, keep it at 128MB  <- ternary operator
     lambda_memory = var.env == "prod" ? 1024 : 128
 
